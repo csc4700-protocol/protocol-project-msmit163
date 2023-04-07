@@ -77,28 +77,41 @@ private int counter = 1;
         //LOGGING
         String parameters = values[indexPlus1] + " " + values[indexPlus2] + " " + values[indexPlus3];
         this.logging("ADD", parameters); 
-
-        if (map.containsKey(key1)){
-            Stack<Integer> stack = map.get(key1);
-            value1 = stack.pop();
+        
+        //REFERENCE
+        if (reference == true){
+            value1 = Integer.parseInt(this.reference(values, indexPlus1));
+            value2 = Integer.parseInt(this.reference(values, indexPlus2));
+            
+            finalValue = ((Integer)(value1 + value2)).toString(); 
+            //values[Integer.parseInt(values[Integer.parseInt(values[indexPlus3])])] = finalValue;
+            values[Integer.parseInt(this.reference(values, indexPlus3))] = finalValue;
         }
         else{
-            value1 = Integer.parseInt(values[indexPlus1]);
-        }
-        //value1 = map.containsKey(key1) ? map.get(key1).pop() : Integer.parseInt(values[indexPlus1])
-        //         IF PART                                       ELSE PART
+            if (map.containsKey(key1)){
+                Stack<Integer> stack = map.get(key1);
+                value1 = stack.pop();
+            }
+            else{
+                value1 = Integer.parseInt(values[indexPlus1]);
+            }
+            //value1 = map.containsKey(key1) ? map.get(key1).pop() : Integer.parseInt(values[indexPlus1])
+            //         IF PART                                       ELSE PART
 
-        if(map.containsKey(key2)){
-            Stack<Integer> stack = map.get(key2);
-            value2 = stack.pop();
-        }
-        else{
-            value2 = Integer.parseInt(values[indexPlus2]);
-        }
-
+            if(map.containsKey(key2)){
+                Stack<Integer> stack = map.get(key2);
+                value2 = stack.pop();
+            }
+            else{
+                value2 = Integer.parseInt(values[indexPlus2]);
+            }
                      //need parenthases around both Integer and values1 and 2 in order to convert toString
         finalValue = ((Integer)(value1 + value2)).toString(); 
         values[Integer.parseInt(values[indexPlus3])] = finalValue;
+        }
+
+
+        
     }
 //SUB 
     public void sub (String[] values, int currIndex){
@@ -115,24 +128,35 @@ private int counter = 1;
         String parameters = values[indexPlus1] + " " + values[indexPlus2] + " " + values[indexPlus3];
         this.logging("SUB", parameters); 
 
-        if (map.containsKey(key1)){
-            Stack<Integer> stack = map.get(key1);
-            value1 = stack.pop();
+        //REFERENCE
+        if (reference == true){
+            value1 = Integer.parseInt(this.reference(values, indexPlus1));
+            value2 = Integer.parseInt(this.reference(values, indexPlus2));
+            
+            finalValue = ((Integer)(value1 - value2)).toString(); 
+            //values[Integer.parseInt(values[Integer.parseInt(values[indexPlus3])])] = finalValue;
+            values[Integer.parseInt(this.reference(values, indexPlus3))] = finalValue;
         }
-        else{
-            value1 = Integer.parseInt(values[indexPlus1]);
-        }
-        
-        if(map.containsKey(key2)){
-            Stack<Integer> stack = map.get(key2);
-            value2 = stack.pop();
-        }
-        else{
-            value2 = Integer.parseInt(values[indexPlus2]);
-        }
+        else{ 
+            if (map.containsKey(key1)){
+                Stack<Integer> stack = map.get(key1);
+                value1 = stack.pop();
+            }
+            else{
+                value1 = Integer.parseInt(values[indexPlus1]);
+            }
+            
+            if(map.containsKey(key2)){
+                Stack<Integer> stack = map.get(key2);
+                value2 = stack.pop();
+            }
+            else{
+                value2 = Integer.parseInt(values[indexPlus2]);
+            }
 
-        finalValue = ((Integer)(value1 - value2)).toString(); 
-        values[Integer.parseInt(values[indexPlus3])] = finalValue;
+            finalValue = ((Integer)(value1 - value2)).toString(); 
+            values[Integer.parseInt(values[indexPlus3])] = finalValue;
+        }
     }
 //OUT
 public void out (String[] values, int currIndex){
@@ -143,18 +167,26 @@ public void out (String[] values, int currIndex){
     String parameters = values[indexPlus1];
     this.logging("OUT", parameters); 
 
-    if (map.containsKey(key)){
-            Stack<Integer> stack = map.get(key);
-            ListIterator<Integer> listIterator = stack.listIterator(stack.size()); //CREATING THE ITERATOR, SAVING IT OFF 
-            while (listIterator.hasPrevious()){                                    //CHECKS TO SEE IF IT'S SAFE TO HOP
-                Integer value = listIterator.previous();                           //DOES THE HOPPING
-                System.out.print(value + " " );
-            }
-            System.out.println();    
+    //REFERENCE
+    if (reference = true){
+        String finalValue = values[Integer.parseInt(this.reference(values, indexPlus1))];
+        System.out.println(finalValue);
     }
     else{
-        String finalValue = values[Integer.parseInt(values[indexPlus1])]; 
-        System.out.println(finalValue);
+        if (map.containsKey(key)){
+                Stack<Integer> stack = map.get(key);
+                ListIterator<Integer> listIterator = stack.listIterator(stack.size()); //CREATING THE ITERATOR, SAVING IT OFF 
+                while (listIterator.hasPrevious()){                                    //CHECKS TO SEE IF IT'S SAFE TO HOP
+                    Integer value = listIterator.previous();                           //DOES THE HOPPING
+                    System.out.print(value + " " );
+                }
+                System.out.println();    
+        }
+        else{
+            String finalValue = values[Integer.parseInt(values[indexPlus1])]; 
+            System.out.println(finalValue);
+        }
+
     }
 }
 //PUSH 
@@ -165,7 +197,7 @@ public void out (String[] values, int currIndex){
 
         //LOGGING 
         String parameters = values[indexPlus1] + " " + values[indexPlus2];
-        this.logging("PUSH", parameters); 
+        this.logging("PUSH", parameters);         
 
         char key = values[indexPlus1].charAt(0);
         int stackIndexPlus2 = Integer.parseInt(values[indexPlus2]);
@@ -251,8 +283,10 @@ public void out (String[] values, int currIndex){
         }
     }
 //REFERENCE
-
-
+    public String reference (String[] values, int parameterIndex){
+        String x = values[Integer.parseInt(values[parameterIndex])];
+        return x;        
+    }
 }
 
 
