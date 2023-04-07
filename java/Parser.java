@@ -6,6 +6,9 @@ import java.util.Map.Entry;
 
 
 class Parser {
+private boolean logging;
+private boolean reference;
+private int counter = 1;
 
     public void parse(String[] values) {
         int currIndex = 0; 
@@ -51,20 +54,16 @@ class Parser {
                 this.dump(values, currIndex);
                 currIndex = currIndex+1;
             } 
-            
+
+            //MODE if statement 
+             if (inputValue.equals("40")){
+              this.mode(values, currIndex);
+              currIndex = currIndex+2; 
+             }
+
         }
     }
-//ADD = ADD TWO VALUES AND STORE THE RESULT AT THE INDEX GIVEN IN THE THIRD
-/*PSEUDOCODE
- *evaluate indexPlus1, determine if it's in the hashmap
- *if it is, find the topmost value in the stack and make it equal to x
- *if it's not, find the value of the index and make it equal to x
- *evalueate indexPlus2, determine if it's in the hashmap
- *it it is, find the topmost value in the stack and make it equal to y
- *if it's not, find the value of the index and make it equal to y
- *finalValue = x + y 
- *read indexPlus3 to see where to put the finalValue 
- */
+    //ADD 
     public void add (String[] values, int currIndex) { 
         int indexPlus1 = currIndex + 1; 
         int indexPlus2 = currIndex + 2; 
@@ -74,6 +73,10 @@ class Parser {
         Integer value2;
         char key1 = values[indexPlus1].charAt(0);
         char key2 = values[indexPlus2].charAt(0);
+
+        //LOGGING
+        String parameters = values[indexPlus1] + " " + values[indexPlus2] + " " + values[indexPlus3];
+        this.logging("ADD", parameters); 
 
         if (map.containsKey(key1)){
             Stack<Integer> stack = map.get(key1);
@@ -108,6 +111,10 @@ class Parser {
         char key1 = values[indexPlus1].charAt(0);
         char key2 = values[indexPlus2].charAt(0);
 
+        //LOGGING
+        String parameters = values[indexPlus1] + " " + values[indexPlus2] + " " + values[indexPlus3];
+        this.logging("SUB", parameters); 
+
         if (map.containsKey(key1)){
             Stack<Integer> stack = map.get(key1);
             value1 = stack.pop();
@@ -127,11 +134,14 @@ class Parser {
         finalValue = ((Integer)(value1 - value2)).toString(); 
         values[Integer.parseInt(values[indexPlus3])] = finalValue;
     }
-
-//OUT PHASE 2 
+//OUT
 public void out (String[] values, int currIndex){
     int indexPlus1 = currIndex + 1;
     char key = values[indexPlus1].charAt(0);
+
+    //LOGGING
+    String parameters = values[indexPlus1];
+    this.logging("OUT", parameters); 
 
     if (map.containsKey(key)){
             Stack<Integer> stack = map.get(key);
@@ -147,13 +157,16 @@ public void out (String[] values, int currIndex){
         System.out.println(finalValue);
     }
 }
-
 //PUSH 
     Map<Character, Stack> map = new HashMap<>();
     public void push (String[] values, int currIndex){
         int indexPlus1 = currIndex + 1;
         int indexPlus2 = currIndex + 2;
-        
+
+        //LOGGING 
+        String parameters = values[indexPlus1] + " " + values[indexPlus2];
+        this.logging("PUSH", parameters); 
+
         char key = values[indexPlus1].charAt(0);
         int stackIndexPlus2 = Integer.parseInt(values[indexPlus2]);
         Stack<Integer> stack = null; 
@@ -168,31 +181,40 @@ public void out (String[] values, int currIndex){
             stack.push(stackIndexPlus2);  //PUSH ONTO THE STACK 
         }
         //map.computeIfAbsent(key, mapKey -> new Stack<Integer>()).push(stackIndexPlus2);
-
     }
 //POP
     public void pop (String[] values, int currIndex){
         int indexPlus1 = currIndex + 1;
         int indexPlus2 = currIndex + 2;
 
+        //LOGGING
+        String parameters = values[indexPlus1] + " " + values[indexPlus2];
+        this.logging("POP", parameters); 
+
         char key = values[indexPlus1].charAt(0);
         Stack<Integer> stack = map.get(key);
         String popValue = stack.pop().toString();
         values[Integer.parseInt(values[indexPlus2])] = popValue; 
     }
-
 //CLEAR
     public void clear (String[] values, int currIndex){
         int indexPlus1 = currIndex + 1;
+        
+        //LOGGING
+        String parameters = values[indexPlus1];
+        this.logging("CLEAR", parameters); 
 
         char key = values[indexPlus1].charAt(0);
         Stack<Integer> stack = map.get(key);
         stack.clear();
-
     }
-
 //DUMP
     public void dump (String[] values, int currIndex){
+    
+        //LOGGING
+        String parameters = " ";
+        this.logging("DUMP", parameters); 
+    
         for (Entry<Character, Stack> entry : map.entrySet()){
             Stack<Integer> stack = entry.getValue();
             System.out.print(entry.getKey() + ": "); 
@@ -204,14 +226,38 @@ public void out (String[] values, int currIndex){
             System.out.println();
         }
     }
+//MODE
+    public void mode (String[] values, int currIndex){
+        int indexPlus1 = currIndex + 1;
 
-
-
-
-
-
-
-
+        switch (values[indexPlus1]) {
+            case "RL" : case "LR" : 
+                reference = true; 
+                logging = true;
+                break;
+            case "R" :
+                reference = true;
+                break; 
+            case "L" :    
+                logging = true;
+                break;
+        }
+    }
+//LOGGING 
+    public void logging (String commandName, String parameters){
+        if (logging == true){
+            System.out.println(counter + ": " + commandName + " " + parameters);
+            counter++;
+        }
+    }
+//REFERENCE
 
 
 }
+
+
+
+
+
+
+
