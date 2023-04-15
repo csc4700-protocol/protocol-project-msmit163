@@ -12,55 +12,51 @@ private int counter = 1;
 
     public void parse(String[] values) {
         int currIndex = 0; 
-        for (int i=0; i<values.length; i++){
+        
+        while (currIndex < values.length){
             String inputValue = values[currIndex]; 
 
             if (inputValue.equals("20")) {  //if 20, run the add command
                 this.add(values, currIndex); 
-                currIndex = currIndex+4;
+                currIndex = currIndex + 4;
             }
-
-            if (inputValue.equals("21")){  //if 21, run sub command
+            else if (inputValue.equals("21")){  //if 21, run sub command
                 this.sub(values, currIndex);
                 currIndex = currIndex+4;
             }
-
-            if (inputValue.equals("11")){  //if 11, run out command
+            else if (inputValue.equals("11")){  //if 11, run out command
                 this.out(values, currIndex);
                 currIndex = currIndex+2;
             }
-            
-            if (inputValue.equals("19")){  //if 19, run end command 
+            else if (inputValue.equals("19")){  //if 19, run end command 
                 break;
             }
-            
-            if (inputValue.equals("30")){  //if input value is 30, run the push method on appropriate stack
+            else if (inputValue.equals("30")){  //if input value is 30, run the push method on appropriate stack
                 this.push(values, currIndex);
                 currIndex = currIndex+3;
             }
-
             //if input value is 31, run the pop method on appropriate stack
-            if (inputValue.equals("31")){
+            else if (inputValue.equals("31")){
                 this.pop(values, currIndex);
                 currIndex = currIndex +3;
             }
             //if input value is 32, delete all values currently in the indicated stack
-            if (inputValue.equals("32")){
+            else if (inputValue.equals("32")){
                 this.clear(values, currIndex);
                 currIndex = currIndex + 2;
             }
-
-            if (inputValue.equals("33")){//if input value is 33, print (DUMP) list of each stack (Last In First Out)
+            else if (inputValue.equals("33")){//if input value is 33, print (DUMP) list of each stack (Last In First Out)
                 this.dump(values, currIndex);
                 currIndex = currIndex+1;
             } 
-
             //MODE if statement 
-             if (inputValue.equals("40")){
+            else if (inputValue.equals("40")){
               this.mode(values, currIndex);
               currIndex = currIndex+2; 
              }
-
+            else{
+                currIndex++;
+            }
         }
     }
     //ADD 
@@ -71,23 +67,39 @@ private int counter = 1;
         String finalValue; 
         Integer value1;
         Integer value2;
-        char key1 = values[indexPlus1].charAt(0);
-        char key2 = values[indexPlus2].charAt(0);
 
         //LOGGING
         String parameters = values[indexPlus1] + " " + values[indexPlus2] + " " + values[indexPlus3];
         this.logging("ADD", parameters); 
         
-        //REFERENCE
+        //REFERENCE ON 
         if (reference == true){
-            value1 = Integer.parseInt(this.reference(values, indexPlus1));
-            value2 = Integer.parseInt(this.reference(values, indexPlus2));
-            
-            finalValue = ((Integer)(value1 + value2)).toString(); 
-            //values[Integer.parseInt(values[Integer.parseInt(values[indexPlus3])])] = finalValue;
-            values[Integer.parseInt(this.reference(values, indexPlus3))] = finalValue;
+            char referenceKey1 = values[Integer.parseInt(values[indexPlus1])].charAt(0); //inception layer to get first value to add
+            char referenceKey2 = values[Integer.parseInt(values[indexPlus2])].charAt(0); //inception layer to get first value to add 
+            int referenceIndexPlus3 = Integer.parseInt(values[Integer.parseInt(values[indexPlus3])]); //accessing location/inception layer to save eventual output 
+
+            if (map.containsKey(referenceKey1)){                //checking if value matches with map
+                Stack<Integer> stack = map.get(referenceKey1);  //if it does, get the associated value(stack)
+                value1 = stack.pop();                           //pop that value and save it in value1
+            }
+            else{
+                value1 = Integer.parseInt(this.reference(values, indexPlus1)); //if it's not in the map, get the value of the reference index and save it in value1
+            }
+            if (map.containsKey(referenceKey2)){                //checking if the value matches with the map
+                Stack<Integer> stack = map.get(referenceKey2);  //if it does, get the associated value(stack)
+                value2 = stack.pop();                           //pop that value and save it in value2
+            }
+            else{
+                value2 = Integer.parseInt(this.reference(values, indexPlus2)); //if it's not on the map, get the value of the reference index and save it in value2
+            }
+            finalValue = ((Integer)(value1 + value2)).toString(); //add the two values, save it in finalValue
+            values[referenceIndexPlus3] = finalValue; //save finalValue into the reference index
         }
+        //REFERENCE OFF 
         else{
+            char key1 = values[indexPlus1].charAt(0); 
+            char key2 = values[indexPlus2].charAt(0);    
+
             if (map.containsKey(key1)){
                 Stack<Integer> stack = map.get(key1);
                 value1 = stack.pop();
@@ -95,9 +107,6 @@ private int counter = 1;
             else{
                 value1 = Integer.parseInt(values[indexPlus1]);
             }
-            //value1 = map.containsKey(key1) ? map.get(key1).pop() : Integer.parseInt(values[indexPlus1])
-            //         IF PART                                       ELSE PART
-
             if(map.containsKey(key2)){
                 Stack<Integer> stack = map.get(key2);
                 value2 = stack.pop();
@@ -109,9 +118,6 @@ private int counter = 1;
         finalValue = ((Integer)(value1 + value2)).toString(); 
         values[Integer.parseInt(values[indexPlus3])] = finalValue;
         }
-
-
-        
     }
 //SUB 
     public void sub (String[] values, int currIndex){
@@ -121,23 +127,40 @@ private int counter = 1;
         Integer value1;
         Integer value2;
         String finalValue;
-        char key1 = values[indexPlus1].charAt(0);
-        char key2 = values[indexPlus2].charAt(0);
 
         //LOGGING
         String parameters = values[indexPlus1] + " " + values[indexPlus2] + " " + values[indexPlus3];
         this.logging("SUB", parameters); 
 
-        //REFERENCE
+        //REFERENCE ON
         if (reference == true){
-            value1 = Integer.parseInt(this.reference(values, indexPlus1));
-            value2 = Integer.parseInt(this.reference(values, indexPlus2));
+            char referenceKey1 = values[Integer.parseInt(values[indexPlus1])].charAt(0); //inception layer to get first value to subtract
+            char referenceKey2 = values[Integer.parseInt(values[indexPlus2])].charAt(0); //inception layer to get second value to subtract
+            int referenceIndexPlus3 = Integer.parseInt(values[Integer.parseInt(values[indexPlus3])]); //accessing location/inception layer to save eventual output 
+            
+            if(map.containsKey(referenceKey1)){
+                Stack<Integer> stack = map.get(referenceKey1);
+                value1 = stack.pop();
+            }
+            else{
+                value1 = Integer.parseInt(this.reference(values, indexPlus1));
+            }
+            if(map.containsKey(referenceKey2)){
+                Stack<Integer> stack = map.get(referenceKey2);
+                value2 = stack.pop();
+            }
+            else{
+                value2 = Integer.parseInt(this.reference(values, indexPlus2));
+            }
             
             finalValue = ((Integer)(value1 - value2)).toString(); 
-            //values[Integer.parseInt(values[Integer.parseInt(values[indexPlus3])])] = finalValue;
-            values[Integer.parseInt(this.reference(values, indexPlus3))] = finalValue;
+            values[referenceIndexPlus3] = finalValue;
         }
+        //REFERENCE OFF 
         else{ 
+            char key1 = values[indexPlus1].charAt(0);
+            char key2 = values[indexPlus2].charAt(0);
+
             if (map.containsKey(key1)){
                 Stack<Integer> stack = map.get(key1);
                 value1 = stack.pop();
@@ -153,8 +176,7 @@ private int counter = 1;
             else{
                 value2 = Integer.parseInt(values[indexPlus2]);
             }
-
-            finalValue = ((Integer)(value1 - value2)).toString(); 
+            finalValue = ((Integer)(value1 - value2)).toString();
             values[Integer.parseInt(values[indexPlus3])] = finalValue;
         }
     }
@@ -167,11 +189,25 @@ public void out (String[] values, int currIndex){
     String parameters = values[indexPlus1];
     this.logging("OUT", parameters); 
 
-    //REFERENCE
-    if (reference = true){
-        String finalValue = values[Integer.parseInt(this.reference(values, indexPlus1))];
-        System.out.println(finalValue);
+    //REFERENCE ON
+    if (reference == true){
+    char referenceKey = this.reference(values, indexPlus1).charAt(0); //using this.reference to going into second inception layer, returning the value there
+
+        if(map.containsKey(referenceKey)){ //check if referenceKey is found in map 
+            Stack<Integer> stack = map.get(referenceKey); //if it is, get associated stack in order to iterate
+            ListIterator<Integer> listIterator = stack.listIterator(stack.size()); //iterate through the stack to "out" it
+        while (listIterator.hasPrevious()){
+            Integer value = listIterator.previous();
+            System.out.print(value + " ");
+        }
+        System.out.println();
+        }
+        else{
+            String finalValue = values[Integer.parseInt(this.reference(values, indexPlus1))]; //if the referenceValue is not a stack
+            System.out.println(finalValue);                                                   //"out" it
+        }
     }
+    //REFERENCE OFF
     else{
         if (map.containsKey(key)){
                 Stack<Integer> stack = map.get(key);
@@ -186,7 +222,6 @@ public void out (String[] values, int currIndex){
             String finalValue = values[Integer.parseInt(values[indexPlus1])]; 
             System.out.println(finalValue);
         }
-
     }
 }
 //PUSH 
@@ -194,39 +229,71 @@ public void out (String[] values, int currIndex){
     public void push (String[] values, int currIndex){
         int indexPlus1 = currIndex + 1;
         int indexPlus2 = currIndex + 2;
+        Stack<Integer> stack = null; 
 
         //LOGGING 
         String parameters = values[indexPlus1] + " " + values[indexPlus2];
         this.logging("PUSH", parameters);         
-
-        char key = values[indexPlus1].charAt(0);
-        int stackIndexPlus2 = Integer.parseInt(values[indexPlus2]);
-        Stack<Integer> stack = null; 
-
-        if (!map.containsKey(key)){       //IF THE STACK DOES NOT EXIST 
-            stack = new Stack<Integer>(); //CRREATE STACK
-            stack.push(stackIndexPlus2);  //PUSH VALUE ONTO STACK
-            map.put(key, stack);          //ADD TO MAP => INDEXPLUS1 TO KEY AND STACK TO VALUE
+        
+        //REFERENCE ON
+        if (reference == true){
+            char referenceKey = values[Integer.parseInt(values[indexPlus1])].charAt(0); //second inception layer to get stack
+            int referenceStackIndexPlus2 = Integer.parseInt(this.reference(values, indexPlus2)); //this.reference will go to the second inception layer where the stack is sitting
+            
+            if (!map.containsKey(referenceKey)){       //if stack does not exist
+                stack = new Stack<Integer>();           //create stack
+                stack.push(referenceStackIndexPlus2);   //push onto that stack
+                map.put(referenceKey, stack);                    //add to map
+            }
+            else{                                       //if stack already exists
+                stack = map.get(referenceKey);         //get the existing stack
+                stack.push(referenceStackIndexPlus2);   //push 
+            }
         }
-        else{                             //IF THE STACK ALREADY EXISTS
-            stack = map.get(key);         //GET THE EXISTING STACK
-            stack.push(stackIndexPlus2);  //PUSH ONTO THE STACK 
+        //REFERENCE OFF
+        else{
+            char key = values[indexPlus1].charAt(0);
+            int stackIndexPlus2 = Integer.parseInt(values[indexPlus2]);
+
+            if (!map.containsKey(key)){       //IF THE STACK DOES NOT EXIST 
+                stack = new Stack<Integer>(); //CRREATE STACK
+                stack.push(stackIndexPlus2);  //PUSH VALUE ONTO STACK
+                map.put(key, stack);          //ADD TO MAP => INDEXPLUS1 TO KEY AND STACK TO VALUE
+            }
+            else{                             //IF THE STACK ALREADY EXISTS
+                stack = map.get(key);         //GET THE EXISTING STACK
+                stack.push(stackIndexPlus2);  //PUSH ONTO THE STACK 
+            }
+            //map.computeIfAbsent(key, mapKey -> new Stack<Integer>()).push(stackIndexPlus2);
         }
-        //map.computeIfAbsent(key, mapKey -> new Stack<Integer>()).push(stackIndexPlus2);
     }
 //POP
     public void pop (String[] values, int currIndex){
         int indexPlus1 = currIndex + 1;
         int indexPlus2 = currIndex + 2;
-
+        String popValue;
+        
         //LOGGING
         String parameters = values[indexPlus1] + " " + values[indexPlus2];
         this.logging("POP", parameters); 
+        
 
-        char key = values[indexPlus1].charAt(0);
-        Stack<Integer> stack = map.get(key);
-        String popValue = stack.pop().toString();
-        values[Integer.parseInt(values[indexPlus2])] = popValue; 
+        //REFERENCE ON
+        if(reference == true){
+            char referenceKey = values[Integer.parseInt(values[indexPlus1])].charAt(0); //second inception layer to get stack
+            int referenceStackIndexPlus2 = Integer.parseInt(this.reference(values, indexPlus2)); //this.reference will go to the second inception layer where the stack is sitting
+            Stack<Integer> stack = map.get(referenceKey);
+            popValue = stack.pop().toString();
+            values[referenceStackIndexPlus2] = popValue;
+        }
+        
+        //REFERENCE OFF
+        else{
+            char key = values[indexPlus1].charAt(0);
+            Stack<Integer> stack = map.get(key);
+            popValue = stack.pop().toString();
+            values[Integer.parseInt(values[indexPlus2])] = popValue; 
+            }
     }
 //CLEAR
     public void clear (String[] values, int currIndex){
@@ -236,9 +303,18 @@ public void out (String[] values, int currIndex){
         String parameters = values[indexPlus1];
         this.logging("CLEAR", parameters); 
 
-        char key = values[indexPlus1].charAt(0);
-        Stack<Integer> stack = map.get(key);
-        stack.clear();
+        //REFERENCE ON
+        if (reference == true){
+            char referenceKey = values[Integer.parseInt(values[indexPlus1])].charAt(0);
+            Stack<Integer> stack = map.get(referenceKey);
+            stack.clear();
+        }
+        //REFERENCE OFF
+        else {
+            char key = values[indexPlus1].charAt(0);
+            Stack<Integer> stack = map.get(key);
+            stack.clear();
+        }
     }
 //DUMP
     public void dump (String[] values, int currIndex){
@@ -276,6 +352,7 @@ public void out (String[] values, int currIndex){
         }
     }
 //LOGGING 
+
     public void logging (String commandName, String parameters){
         if (logging == true){
             System.out.println(counter + ": " + commandName + " " + parameters);
