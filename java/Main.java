@@ -15,7 +15,13 @@ class Main {
         System.out.println();
 
         Parser parser = new Parser();
-        parser.parse(inputValues);
+
+        try {
+            parser.parse(inputValues);
+        }
+        catch (Exception e) {
+            System.out.println("Error parsing protocol: " + e.getClass().getCanonicalName());
+        }
     }
 
     private static String[] processArgs(String[] args) {
