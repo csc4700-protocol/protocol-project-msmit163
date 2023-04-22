@@ -1,3 +1,18 @@
+== Phase 3 ==
+Grade: 19 / 20
+
+Very impressive!
+
+- No logging statement for END command:
+
+Processing input: 40 L 20 20 5 16 21 7 18 16 11 16 11 6 19 12 32 19
+1: ADD 20 5 16
+2: SUB 7 18 16
+3: OUT 16
+-11
+4: OUT 6
+21
+
 == Phase 2 ==
 Grade: 20 / 20
 
