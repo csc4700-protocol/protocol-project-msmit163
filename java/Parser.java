@@ -14,7 +14,7 @@ private int counter = 1;
         int currIndex = 0; 
         
         while (currIndex < values.length){
-            String inputValue = values[currIndex]; 
+            String inputValue = getValue(values, currIndex); 
 
             if (inputValue.equals("20")) {  //if 20, run the add command
                 this.add(values, currIndex); 
@@ -28,7 +28,8 @@ private int counter = 1;
                 this.out(values, currIndex);
                 currIndex = currIndex+2;
             }
-            else if (inputValue.equals("19")){  //if 19, run end command 
+            else if (inputValue.equals("19")){  //if 19, run end command **NEED LOGGING STATEMENT
+                this.end(values, currIndex);
                 break;
             }
             else if (inputValue.equals("30")){  //if input value is 30, run the push method on appropriate stack
@@ -55,7 +56,12 @@ private int counter = 1;
               currIndex = currIndex+2; 
              }
             else{
-                currIndex++;
+                //INVALIDCOMMANDEXCEPTION
+                throw new InvalidCommandException();
+            }
+            //INCOMPLETEPROTOCOLEXCEPTION
+            if (currIndex == values.length){ //don't need to check if we're hitting 19, becase we would have already exited the loop 
+                throw new IncompleteProtocolException();
             }
         }
     }
@@ -69,54 +75,66 @@ private int counter = 1;
         Integer value2;
 
         //LOGGING
-        String parameters = values[indexPlus1] + " " + values[indexPlus2] + " " + values[indexPlus3];
+        String parameters = getValue(values, indexPlus1) + " " + getValue(values, indexPlus2) + " " + getValue(values, indexPlus3);
         this.logging("ADD", parameters); 
         
         //REFERENCE ON 
         if (reference == true){
-            char referenceKey1 = values[Integer.parseInt(values[indexPlus1])].charAt(0); //inception layer to get first value to add
-            char referenceKey2 = values[Integer.parseInt(values[indexPlus2])].charAt(0); //inception layer to get first value to add 
-            int referenceIndexPlus3 = Integer.parseInt(values[Integer.parseInt(values[indexPlus3])]); //accessing location/inception layer to save eventual output 
+            char referenceKey1 = getValue(values, Integer.parseInt(getValue(values, indexPlus1))).charAt(0); //inception layer to get first value to add
+            char referenceKey2 = getValue(values, Integer.parseInt(getValue(values, indexPlus2))).charAt(0); //inception layer to get first value to add 
+            int referenceIndexPlus3 = Integer.parseInt(getValue(values, Integer.parseInt(getValue(values, indexPlus3)))); //accessing location/inception layer to save eventual output 
 
             if (map.containsKey(referenceKey1)){                //checking if value matches with map
                 Stack<Integer> stack = map.get(referenceKey1);  //if it does, get the associated value(stack)
-                value1 = stack.pop();                           //pop that value and save it in value1
+                value1 = popCheck(stack);                           //pop that value and save it in value1
+            }
+            else if (String.valueOf(referenceKey1).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+                throw new NonExistentStackException(); 
             }
             else{
                 value1 = Integer.parseInt(this.reference(values, indexPlus1)); //if it's not in the map, get the value of the reference index and save it in value1
             }
             if (map.containsKey(referenceKey2)){                //checking if the value matches with the map
                 Stack<Integer> stack = map.get(referenceKey2);  //if it does, get the associated value(stack)
-                value2 = stack.pop();                           //pop that value and save it in value2
+                value2 = popCheck(stack);                           //pop that value and save it in value2
+            }
+            else if (String.valueOf(referenceKey1).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+                throw new NonExistentStackException(); 
             }
             else{
                 value2 = Integer.parseInt(this.reference(values, indexPlus2)); //if it's not on the map, get the value of the reference index and save it in value2
             }
             finalValue = ((Integer)(value1 + value2)).toString(); //add the two values, save it in finalValue
-            values[referenceIndexPlus3] = finalValue; //save finalValue into the reference index
+            setValue(values, referenceIndexPlus3, finalValue);//save finalValue into the reference index
         }
         //REFERENCE OFF 
         else{
-            char key1 = values[indexPlus1].charAt(0); 
-            char key2 = values[indexPlus2].charAt(0);    
+            char key1 = getValue(values, indexPlus1).charAt(0); 
+            char key2 = getValue(values, indexPlus2).charAt(0);    
 
             if (map.containsKey(key1)){
                 Stack<Integer> stack = map.get(key1);
-                value1 = stack.pop();
+                value1 = popCheck(stack);
+            }
+            else if (String.valueOf(key1).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+                throw new NonExistentStackException(); 
             }
             else{
-                value1 = Integer.parseInt(values[indexPlus1]);
+                value1 = Integer.parseInt(getValue(values, indexPlus1));
             }
             if(map.containsKey(key2)){
                 Stack<Integer> stack = map.get(key2);
-                value2 = stack.pop();
+                value2 = popCheck(stack);
+            }
+            else if (String.valueOf(key2).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+                throw new NonExistentStackException(); 
             }
             else{
-                value2 = Integer.parseInt(values[indexPlus2]);
+                value2 = Integer.parseInt(getValue(values, indexPlus2));
             }
                      //need parenthases around both Integer and values1 and 2 in order to convert toString
         finalValue = ((Integer)(value1 + value2)).toString(); 
-        values[Integer.parseInt(values[indexPlus3])] = finalValue;
+        setValue(values, Integer.parseInt(getValue(values, indexPlus3)), finalValue);
         }
     }
 //SUB 
@@ -129,64 +147,76 @@ private int counter = 1;
         String finalValue;
 
         //LOGGING
-        String parameters = values[indexPlus1] + " " + values[indexPlus2] + " " + values[indexPlus3];
+        String parameters = getValue(values, indexPlus1) + " " + getValue(values, indexPlus2) + " " + getValue(values, indexPlus3);
         this.logging("SUB", parameters); 
 
         //REFERENCE ON
         if (reference == true){
-            char referenceKey1 = values[Integer.parseInt(values[indexPlus1])].charAt(0); //inception layer to get first value to subtract
-            char referenceKey2 = values[Integer.parseInt(values[indexPlus2])].charAt(0); //inception layer to get second value to subtract
-            int referenceIndexPlus3 = Integer.parseInt(values[Integer.parseInt(values[indexPlus3])]); //accessing location/inception layer to save eventual output 
+            char referenceKey1 = getValue(values, Integer.parseInt(getValue(values, indexPlus1))).charAt(0); //inception layer to get first value to subtract
+            char referenceKey2 = getValue(values, Integer.parseInt(getValue(values, indexPlus2))).charAt(0); //inception layer to get second value to subtract
+            int referenceIndexPlus3 = Integer.parseInt(getValue(values, Integer.parseInt(getValue(values, indexPlus3)))); //accessing location/inception layer to save eventual output 
             
             if(map.containsKey(referenceKey1)){
                 Stack<Integer> stack = map.get(referenceKey1);
-                value1 = stack.pop();
+                value1 = popCheck(stack);
+            }
+            else if (String.valueOf(referenceKey1).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+                throw new NonExistentStackException(); 
             }
             else{
                 value1 = Integer.parseInt(this.reference(values, indexPlus1));
             }
             if(map.containsKey(referenceKey2)){
                 Stack<Integer> stack = map.get(referenceKey2);
-                value2 = stack.pop();
+                value2 = popCheck(stack);
+            }
+            else if (String.valueOf(referenceKey1).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+                throw new NonExistentStackException(); 
             }
             else{
                 value2 = Integer.parseInt(this.reference(values, indexPlus2));
             }
             
             finalValue = ((Integer)(value1 - value2)).toString(); 
-            values[referenceIndexPlus3] = finalValue;
+            setValue(values, referenceIndexPlus3, finalValue);
         }
         //REFERENCE OFF 
         else{ 
-            char key1 = values[indexPlus1].charAt(0);
-            char key2 = values[indexPlus2].charAt(0);
+            char key1 = getValue(values, indexPlus1).charAt(0);
+            char key2 = getValue(values, indexPlus2).charAt(0);
 
             if (map.containsKey(key1)){
                 Stack<Integer> stack = map.get(key1);
-                value1 = stack.pop();
+                value1 = popCheck(stack);
+            }
+            else if (String.valueOf(key1).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+                throw new NonExistentStackException(); 
             }
             else{
-                value1 = Integer.parseInt(values[indexPlus1]);
+                value1 = Integer.parseInt(getValue(values, indexPlus1));
             }
             
             if(map.containsKey(key2)){
                 Stack<Integer> stack = map.get(key2);
-                value2 = stack.pop();
+                value2 = popCheck(stack);
+            }
+            else if (String.valueOf(key2).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+                throw new NonExistentStackException(); 
             }
             else{
-                value2 = Integer.parseInt(values[indexPlus2]);
+                value2 = Integer.parseInt(getValue(values, indexPlus2));
             }
             finalValue = ((Integer)(value1 - value2)).toString();
-            values[Integer.parseInt(values[indexPlus3])] = finalValue;
+            setValue(values, indexPlus3, finalValue);
         }
     }
 //OUT
 public void out (String[] values, int currIndex){
     int indexPlus1 = currIndex + 1;
-    char key = values[indexPlus1].charAt(0);
+    char key = getValue(values, indexPlus1).charAt(0);
 
     //LOGGING
-    String parameters = values[indexPlus1];
+    String parameters = getValue(values, indexPlus1);
     this.logging("OUT", parameters); 
 
     //REFERENCE ON
@@ -202,8 +232,11 @@ public void out (String[] values, int currIndex){
         }
         System.out.println();
         }
+        else if (String.valueOf(referenceKey).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+            throw new NonExistentStackException(); 
+        }
         else{
-            String finalValue = values[Integer.parseInt(this.reference(values, indexPlus1))]; //if the referenceValue is not a stack
+            String finalValue = getValue(values, Integer.parseInt(this.reference(values, indexPlus1))); //if the referenceValue is not a stack
             System.out.println(finalValue);                                                   //"out" it
         }
     }
@@ -218,8 +251,11 @@ public void out (String[] values, int currIndex){
                 }
                 System.out.println();    
         }
+        else if (String.valueOf(key).matches("[a-z]")){ //validating whether the value is a character, we will know whether it is an invalid stack name
+            throw new NonExistentStackException(); 
+        }
         else{
-            String finalValue = values[Integer.parseInt(values[indexPlus1])]; 
+            String finalValue = getValue(values, Integer.parseInt(getValue(values, indexPlus1))); 
             System.out.println(finalValue);
         }
     }
@@ -232,12 +268,12 @@ public void out (String[] values, int currIndex){
         Stack<Integer> stack = null; 
 
         //LOGGING 
-        String parameters = values[indexPlus1] + " " + values[indexPlus2];
+        String parameters = getValue(values, indexPlus1) + " " + getValue(values, indexPlus2);
         this.logging("PUSH", parameters);         
         
         //REFERENCE ON
         if (reference == true){
-            char referenceKey = values[Integer.parseInt(values[indexPlus1])].charAt(0); //second inception layer to get stack
+            char referenceKey = getValue(values, Integer.parseInt(getValue(values, indexPlus1))).charAt(0); //second inception layer to get stack
             int referenceStackIndexPlus2 = Integer.parseInt(this.reference(values, indexPlus2)); //this.reference will go to the second inception layer where the stack is sitting
             
             if (!map.containsKey(referenceKey)){       //if stack does not exist
@@ -252,8 +288,8 @@ public void out (String[] values, int currIndex){
         }
         //REFERENCE OFF
         else{
-            char key = values[indexPlus1].charAt(0);
-            int stackIndexPlus2 = Integer.parseInt(values[indexPlus2]);
+            char key = getValue(values, indexPlus1).charAt(0);
+            int stackIndexPlus2 = Integer.parseInt(getValue(values, indexPlus2));
 
             if (!map.containsKey(key)){       //IF THE STACK DOES NOT EXIST 
                 stack = new Stack<Integer>(); //CRREATE STACK
@@ -274,44 +310,60 @@ public void out (String[] values, int currIndex){
         String popValue;
         
         //LOGGING
-        String parameters = values[indexPlus1] + " " + values[indexPlus2];
+        String parameters = getValue(values, indexPlus1) + " " + getValue(values, indexPlus2);
         this.logging("POP", parameters); 
         
 
         //REFERENCE ON
         if(reference == true){
-            char referenceKey = values[Integer.parseInt(values[indexPlus1])].charAt(0); //second inception layer to get stack
+            char referenceKey = getValue(values, Integer.parseInt(getValue(values, indexPlus1))).charAt(0); //second inception layer to get stack
             int referenceStackIndexPlus2 = Integer.parseInt(this.reference(values, indexPlus2)); //this.reference will go to the second inception layer where the stack is sitting
+            
+            if (!map.containsKey(referenceKey)){
+                throw new NonExistentStackException();
+            }
+            else{
             Stack<Integer> stack = map.get(referenceKey);
-            popValue = stack.pop().toString();
-            values[referenceStackIndexPlus2] = popValue;
+            popValue = popCheck(stack).toString();
+            setValue(values, referenceStackIndexPlus2, popValue);
+            }
         }
-        
         //REFERENCE OFF
         else{
-            char key = values[indexPlus1].charAt(0);
-            Stack<Integer> stack = map.get(key);
-            popValue = stack.pop().toString();
-            values[Integer.parseInt(values[indexPlus2])] = popValue; 
+            char key = getValue(values, indexPlus1).charAt(0);
+            
+            if (!map.containsKey(key)){
+                throw new NonExistentStackException();
             }
+            Stack<Integer> stack = map.get(key);
+            popValue = popCheck(stack).toString();
+            setValue(values, Integer.parseInt(getValue(values,indexPlus2)), popValue);
+        }
     }
 //CLEAR
     public void clear (String[] values, int currIndex){
         int indexPlus1 = currIndex + 1;
         
         //LOGGING
-        String parameters = values[indexPlus1];
+        String parameters = getValue(values, indexPlus1);
         this.logging("CLEAR", parameters); 
 
         //REFERENCE ON
         if (reference == true){
-            char referenceKey = values[Integer.parseInt(values[indexPlus1])].charAt(0);
+            char referenceKey = getValue(values, Integer.parseInt(getValue(values, indexPlus1))).charAt(0);
+            if(!map.containsKey(referenceKey)){
+                throw new NonExistentStackException();
+            }
             Stack<Integer> stack = map.get(referenceKey);
             stack.clear();
         }
         //REFERENCE OFF
         else {
-            char key = values[indexPlus1].charAt(0);
+            char key = getValue(values, indexPlus1).charAt(0);
+            
+            if (!map.containsKey(key)){
+                throw new NonExistentStackException();
+            }
             Stack<Integer> stack = map.get(key);
             stack.clear();
         }
@@ -338,7 +390,7 @@ public void out (String[] values, int currIndex){
     public void mode (String[] values, int currIndex){
         int indexPlus1 = currIndex + 1;
 
-        switch (values[indexPlus1]) {
+        switch (getValue(values, indexPlus1)) {
             case "RL" : case "LR" : 
                 reference = true; 
                 logging = true;
@@ -349,10 +401,17 @@ public void out (String[] values, int currIndex){
             case "L" :    
                 logging = true;
                 break;
+            default : //INVALIDMODEEXCEPTION
+                throw new InvalidModeException();
         }
     }
+//END
+    public void end (String[] values, int currIndex){
+        //LOGGING 
+        String parameters = " ";
+        this.logging("END", parameters);
+    }
 //LOGGING 
-
     public void logging (String commandName, String parameters){
         if (logging == true){
             System.out.println(counter + ": " + commandName + " " + parameters);
@@ -361,11 +420,36 @@ public void out (String[] values, int currIndex){
     }
 //REFERENCE
     public String reference (String[] values, int parameterIndex){
-        String x = values[Integer.parseInt(values[parameterIndex])];
+        String x = getValue(values, Integer.parseInt(getValue(values, parameterIndex)));
         return x;        
     }
+//INDEXOUTOFBOUNDSEXCEPTION METHOD
+    public String getValue (String[] values, int currIndex){
+        if (currIndex >= values.length){
+            throw new IndexOutOfBoundsException();
+        }
+        else{
+            return values[currIndex];
+        }
+    }
+    public void setValue (String[] values, int currIndex, String value){
+        if (currIndex >= values.length){
+            throw new IndexOutOfBoundsException();
+        }
+        else{
+            values[currIndex] = value;
+        }
+    }
+//EMPTYSTACKEXCEPTION
+    public Integer popCheck (Stack<Integer> stack){
+        if(stack.isEmpty()){
+            throw new EmptyStackException();            
+        }
+        else{
+            return stack.pop();
+        }
+    }
 }
-
 
 
 
